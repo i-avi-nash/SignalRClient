@@ -1,0 +1,41 @@
+.message-wrapper {
+    display: flex;
+    flex-grow: 1;
+    border: 1px solid green;
+    flex-direction: column;
+    padding: 4px;
+    box-shadow: 1px 1px 1px rebeccapurple;
+    margin-top: 4px;
+  }
+  
+  .message-wrapper-self {
+    background-color: yellowgreen;
+  }
+  
+  .message-wrapper-other {
+    background-color: skyblue;
+  }
+  
+  .message-header {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+  }
+  
+  .username {
+    font-size: 16px;
+    font-weight: 600;
+    flex-grow: 1;
+  }
+  
+  .time {
+    font-size: 12px;
+    display: flex;
+    justify-content: flex-end;
+    flex-grow: 1;
+  }
+  
+  .message-body {
+    font-size: 14px;
+    padding: 2px;
+  }

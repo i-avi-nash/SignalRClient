@@ -1,0 +1,17 @@
+<!-- [ngStyle]="{'background-color': message.name === username ? 'yellowgreen': 'skyblue'}" -->
+<div [ngClass]="{
+    'message-wrapper-self': message.name === username,
+    'message-wrapper-other': message.name !== username
+    }">
+    <div class="message-header">
+        <div class="username">
+            {{message.name}}
+        </div>
+        <div class="time">
+            {{message.timestamp}}
+        </div>
+    </div>
+    <div class="message-body">
+        {{message.text}}
+    </div>
+</div>
