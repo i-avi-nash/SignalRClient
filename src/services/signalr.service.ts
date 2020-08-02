@@ -5,6 +5,7 @@ import axios from "axios";
 import { AxiosInstance } from "axios";
 import { ErrorHandler } from "@angular/core";
 import { Message } from 'src/models/message.model';
+import { environment } from '../environments/environment';
 
 @Injectable({
     providedIn: 'root'
@@ -15,29 +16,36 @@ export class SignalrService {
     connectionId: string = undefined;
 
     message: Message = new Message();
-
     private messageSource = new BehaviorSubject(this.message);
     currentMessage = this.messageSource.asObservable();
 
+    privateMessage: Message = new Message();
+    private privateMessageSource = new BehaviorSubject(this.privateMessage);
+    currentPrivateMessage = this.privateMessageSource.asObservable();
+
     private axiosClient: AxiosInstance;
     private errorHandler: ErrorHandler;
+    private API_URI = environment.API_URI;
 
     constructor(errorHandler: ErrorHandler) {
         this.connection = new HubConnectionBuilder()
-            // .withUrl('http://localhost:5000/ChatHub')
-            .withUrl('http://signalrserver.ap-south-1.elasticbeanstalk.com/ChatHub')
+            .withUrl(`${this.API_URI}/ChatHub`)
             .build();
 
         this.connection.start()
             .then(() => {
                 this.connection.invoke("getConnectionId").then((connectionId: string) => {
-                    console.log(connectionId);
+                    localStorage.setItem('connectionId', connectionId);
                     this.connectionId = connectionId;
                 });
             });
 
         this.connection.on("receiveMessage", (message: Message) => {
             this.messageSource.next(message);
+        });
+
+        this.connection.on("receivePM", (privateMessage: Message) => {
+            this.privateMessageSource.next(privateMessage);
         });
 
         this.errorHandler = errorHandler;
@@ -49,13 +57,26 @@ export class SignalrService {
         });
     }
 
-    public async sendMessage<T>(chatId: number, message: string, userName: string, roomName: string): Promise<T> {
+    public async sendMessage<T>(chatId: string, message: string, userName: string, roomName: string): Promise<T> {
         var paramData = { chatId, message, userName, roomName };
         try {
             var result = await this.axiosClient.request<T>({
                 method: "post",
-                // url: 'http://localhost:5000/api/chathub/SendMessage',
-                url: 'http://signalrserver.ap-south-1.elasticbeanstalk.com/api/chathub/SendMessage',
+                url: `${this.API_URI}/api/chathub/SendMessage`,
+                params: paramData
+            });
+            return result.data;
+        } catch (error) {
+            return (Promise.reject(this.normalizeError(error)));
+        }
+    }
+
+    public async sendPM<T>(chatId: string, message: string, username: string): Promise<T> {
+        var paramData = { chatId, message, username };
+        try {
+            var result = await this.axiosClient.request<T>({
+                method: "post",
+                url: `${this.API_URI}/api/chathub/sendPM`,
                 params: paramData
             });
             return result.data;
@@ -69,8 +90,7 @@ export class SignalrService {
         try {
             var axiosResponse = await this.axiosClient.request<T>({
                 method: "post",
-                // url: 'http://localhost:5000/api/chathub/JoinRoom',
-                url: 'http://signalrserver.ap-south-1.elasticbeanstalk.com/api/chathub/JoinRoom',
+                url: `${this.API_URI}/api/chathub/JoinRoom`,
                 params: paramData
             });
             return (axiosResponse.data);
@@ -83,8 +103,7 @@ export class SignalrService {
         try {
             var axiosResponse = await this.axiosClient.request<T>({
                 method: "post",
-                // url: 'http://localhost:5000/api/chat/CreateRoom',
-                url: 'http://signalrserver.ap-south-1.elasticbeanstalk.com/api/chat/CreateRoom',
+                url: `${this.API_URI}/api/chat/CreateRoom`,
                 params: { roomName }
             });
             return (axiosResponse.data);

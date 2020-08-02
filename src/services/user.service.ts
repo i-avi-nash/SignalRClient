@@ -2,6 +2,8 @@ import { Injectable, ErrorHandler } from '@angular/core';
 import axios from "axios";
 import { AxiosInstance } from "axios";
 import { ToastrService } from 'ngx-toastr';
+import { environment } from '../environments/environment';
+import { SignalrService } from './signalr.service';
 
 @Injectable({
     providedIn: 'root'
@@ -10,10 +12,11 @@ export class UserService {
 
     private axiosClient: AxiosInstance;
     private errorHandler: ErrorHandler;
-    // private BaseURI: string = 'http://localhost:5000';
-    private BaseURI: string = 'http://signalrserver.ap-south-1.elasticbeanstalk.com';
+    private API_URI = environment.API_URI;
+    connectionId: string = '';
 
-    constructor(errorHandler: ErrorHandler, private toastr: ToastrService) {
+    constructor(errorHandler: ErrorHandler, private toastr: ToastrService, private _signalRService: SignalrService) {
+        console.log(this.API_URI);
         this.errorHandler = errorHandler;
         this.axiosClient = axios.create({
             timeout: 3000,
@@ -31,8 +34,7 @@ export class UserService {
         try {
             var result = await this.axiosClient.request<T>({
                 method: "post",
-                // url: 'http://localhost:5000/api/auth/Register',
-                url: 'http://signalrserver.ap-south-1.elasticbeanstalk.com/api/auth/Register',
+                url: `${this.API_URI}/api/auth/Register`,
                 params: { ...user }
             });
             return result.data;
@@ -45,7 +47,7 @@ export class UserService {
         try {
             var result = await this.axiosClient.request<T>({
                 method: "post",
-                url: this.BaseURI + '/api/auth/login',
+                url: `${this.API_URI}/api/auth/login`,
                 params: { ...user }
             });
             return result.data;
@@ -59,7 +61,36 @@ export class UserService {
             var result = await this.axiosClient.request<T>({
                 method: "get",
                 headers: { Authorization: `Bearer ${this.getToken()}` },
-                url: this.BaseURI + '/api/profile'
+                url: `${this.API_URI}/api/profile`
+            });
+            return result.data;
+        } catch (error) {
+            return (Promise.reject(this.normalizeError(error)));
+        }
+    }
+
+    public async searchUser<T>(searchText): Promise<T> {
+        try {
+            var result = await this.axiosClient.request<T>({
+                method: "get",
+                headers: { Authorization: `Bearer ${this.getToken()}` },
+                url: `${this.API_URI}/api/auth/search`,
+                params: { username: searchText }
+            });
+            return result.data;
+        } catch (error) {
+            return (Promise.reject(this.normalizeError(error)));
+        }
+    }
+
+    public async JoinChat<T>(sender: string, receiver: string): Promise<T> {
+        const paramData = { sender, receiver, connectionId: this._signalRService.connectionId };
+        try {
+            var result = await this.axiosClient.request<T>({
+                method: "post",
+                headers: { Authorization: `Bearer ${this.getToken()}` },
+                url: `${this.API_URI}/api/chat/JoinChat`,
+                params: paramData
             });
             return result.data;
         } catch (error) {

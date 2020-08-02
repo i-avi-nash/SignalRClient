@@ -285,3 +285,8 @@ label:hover:before {
   color: #aaaaaa;
   font-weight: bold;
 }
+.message-container {
+  overflow: auto;
+  height: 400px;
+  width: 500px;
+}

@@ -33,7 +33,7 @@ export class GlobalRoomComponent implements OnInit, AfterViewChecked {
     }
 
     joinGlobal() {
-        this.joinChatTriggered = true;
+        this.joinChatTriggered ? this.joinChatTriggered = false : this.joinChatTriggered = true;
         this._service.joinRoom('global')
             .then((room: Chat) => {
                 this.room = room;

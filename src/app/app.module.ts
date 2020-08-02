@@ -17,6 +17,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { HomeComponent } from './home/home.component';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './auth/auth.interceptor';
+import { PrivateRoomComponent } from './home/private-room/private-room.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { AuthInterceptor } from './auth/auth.interceptor';
     LoginComponent,
     UserComponent,
     RegisterComponent,
-    HomeComponent
+    HomeComponent,
+    PrivateRoomComponent
   ],
   imports: [
     CommonModule,

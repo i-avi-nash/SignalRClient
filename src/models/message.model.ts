@@ -1,11 +1,11 @@
 import { Chat } from './chat.model';
 
 export class Message {
-    id: number;
+    id: string;
     name: string;
     text: string;
     timeStamp: string;
-    chatId: number;
+    chatId: string;
     chat?: Chat;
     user?: any;
 }
